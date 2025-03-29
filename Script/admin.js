@@ -73,20 +73,30 @@ productForm.addEventListener('submit', async (e) => {
         // Create a unique filename
         const timestamp = Date.now();
         const filename = `${timestamp}_${imageFile.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+        
+        // Get the storage reference
         const storageRef = ref(storage, `products/${filename}`);
         
         // Upload image to Firebase Storage
+        console.log('Starting upload to:', storageRef.fullPath);
         const snapshot = await uploadBytes(storageRef, imageFile);
+        console.log('Upload successful:', snapshot);
+        
+        // Get the download URL
         const imageUrl = await getDownloadURL(snapshot.ref);
+        console.log('Download URL:', imageUrl);
         
         // Add product to Firestore
-        await addDoc(collection(db, 'products'), {
+        const productData = {
             name,
             description,
             price,
             imageUrl,
             createdAt: new Date()
-        });
+        };
+        
+        console.log('Adding product to Firestore:', productData);
+        await addDoc(collection(db, 'products'), productData);
         
         // Reset form
         productForm.reset();
