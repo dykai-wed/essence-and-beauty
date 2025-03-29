@@ -1,15 +1,18 @@
 {
-  "name": "smells-fancy-final-test",
+  "name": "essence-and-beauty",
   "version": "1.0.0",
+  "description": "A beauty products e-commerce website",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "live-server"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
-    "firebase": "^11.5.0"
+    "firebase": "^10.8.0"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.2"
   }
 }

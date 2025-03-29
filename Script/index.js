@@ -1,19 +1,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 import { getFirestore, collection, getDocs, addDoc, doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDxXqXqXqXqXqXqXqXqXqXqXqXqXqXqXqXq",
-  authDomain: "your-auth-domain.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-storage-bucket.appspot.com",
-  messagingSenderId: "your-messaging-sender-id",
-  appId: "your-app-id"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { auth, db } from './firebase-config.js';
 
 // Cart functionality
 let cart = [];
