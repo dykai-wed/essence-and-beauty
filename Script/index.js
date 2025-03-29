@@ -1,6 +1,17 @@
 import { auth, db } from './firebase-config.js';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-import { collection, getDocs, addDoc, doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+import { 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    signOut, 
+    onAuthStateChanged 
+} from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+import { 
+    collection, 
+    getDocs, 
+    addDoc, 
+    doc, 
+    setDoc 
+} from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
 // Cart functionality
 let cart = [];
@@ -9,7 +20,9 @@ let currentUser = null;
 // Update cart badge
 function updateCartBadge() {
     const badge = document.querySelector('.cart-badge');
-    badge.textContent = cart.reduce((total, item) => total + item.quantity, 0);
+    if (badge) {
+        badge.textContent = cart.reduce((total, item) => total + item.quantity, 0);
+    }
 }
 
 // Update cart display
@@ -17,30 +30,35 @@ function updateCartDisplay() {
     const cartItems = document.getElementById('cartItems');
     const cartTotal = document.getElementById('cartTotal');
     
-    cartItems.innerHTML = cart.map(item => `
-        <div class="cart-item">
-            <img src="${item.imageUrl}" alt="${item.name}">
-            <div class="cart-item-details">
-                <h6>${item.name}</h6>
-                <p class="cart-item-price">$${item.price} x ${item.quantity}</p>
+    if (cartItems) {
+        cartItems.innerHTML = cart.map(item => `
+            <div class="cart-item">
+                <img src="${item.imageUrl}" alt="${item.name}">
+                <div class="cart-item-details">
+                    <h6>${item.name}</h6>
+                    <p class="cart-item-price">$${item.price} x ${item.quantity}</p>
+                </div>
+                <button class="btn btn-sm btn-danger remove-item" data-id="${item.id}">
+                    <i class="bi bi-trash"></i>
+                </button>
             </div>
-            <button class="btn btn-sm btn-danger remove-item" data-id="${item.id}">
-                <i class="bi bi-trash"></i>
-            </button>
-        </div>
-    `).join('');
+        `).join('');
 
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    cartTotal.textContent = total.toFixed(2);
-    updateCartBadge();
-
-    // Add event listeners to remove buttons
-    document.querySelectorAll('.remove-item').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const id = e.target.closest('.remove-item').dataset.id;
-            removeFromCart(id);
+        // Add event listeners to remove buttons
+        document.querySelectorAll('.remove-item').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const id = e.target.closest('.remove-item').dataset.id;
+                removeFromCart(id);
+            });
         });
-    });
+    }
+
+    if (cartTotal) {
+        const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        cartTotal.textContent = total.toFixed(2);
+    }
+    
+    updateCartBadge();
 }
 
 // Add to cart
@@ -60,86 +78,126 @@ function removeFromCart(productId) {
     updateCartDisplay();
 }
 
-// Checkout
-document.getElementById('checkoutBtn').addEventListener('click', async () => {
-    if (!currentUser) {
-        alert('Please login to checkout');
-        return;
-    }
-    
-    try {
-        const orderRef = await addDoc(collection(db, 'orders'), {
-            userId: currentUser.uid,
-            items: cart,
-            total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-            status: 'pending',
-            createdAt: new Date()
+// Initialize all event listeners and functionality
+function initializeApp() {
+    // Checkout button
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', async () => {
+            if (!currentUser) {
+                alert('Please login to checkout');
+                return;
+            }
+            
+            try {
+                const orderRef = await addDoc(collection(db, 'orders'), {
+                    userId: currentUser.uid,
+                    items: cart,
+                    total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                    status: 'pending',
+                    createdAt: new Date()
+                });
+                
+                alert('Order placed successfully!');
+                cart = [];
+                updateCartDisplay();
+            } catch (error) {
+                console.error('Error placing order:', error);
+                alert('Error placing order. Please try again.');
+            }
         });
-        
-        alert('Order placed successfully!');
-        cart = [];
-        updateCartDisplay();
-    } catch (error) {
-        console.error('Error placing order:', error);
-        alert('Error placing order. Please try again.');
     }
-});
 
-// Authentication
-onAuthStateChanged(auth, (user) => {
-    currentUser = user;
-    const loginBtn = document.querySelector('[data-bs-target="#loginModal"]');
-    if (user) {
-        loginBtn.innerHTML = '<i class="bi bi-box-arrow-right"></i>';
-        loginBtn.setAttribute('data-bs-target', '');
-        loginBtn.addEventListener('click', () => signOut(auth));
-    } else {
-        loginBtn.innerHTML = '<i class="bi bi-person"></i>';
-        loginBtn.setAttribute('data-bs-target', '#loginModal');
-        loginBtn.removeEventListener('click', () => signOut(auth));
+    // Login form
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+                if (loginModal) {
+                    loginModal.hide();
+                }
+            } catch (error) {
+                alert('Login failed: ' + error.message);
+            }
+        });
     }
-});
 
-// Login form
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
+    // Register form
+    const registerForm = document.getElementById('registerForm');
+    if (registerForm) {
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
 
-    try {
-        await signInWithEmailAndPassword(auth, email, password);
-        bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
-    } catch (error) {
-        alert('Login failed: ' + error.message);
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+                if (registerModal) {
+                    registerModal.hide();
+                }
+            } catch (error) {
+                alert('Registration failed: ' + error.message);
+            }
+        });
     }
-});
 
-// Register form
-document.getElementById('registerForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('registerEmail').value;
-    const password = document.getElementById('registerPassword').value;
-
-    try {
-        await createUserWithEmailAndPassword(auth, email, password);
-        bootstrap.Modal.getInstance(document.getElementById('registerModal')).hide();
-    } catch (error) {
-        alert('Registration failed: ' + error.message);
+    // Modal switching
+    const showRegister = document.getElementById('showRegister');
+    if (showRegister) {
+        showRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+            const registerModal = new bootstrap.Modal(document.getElementById('registerModal'));
+            if (loginModal) {
+                loginModal.hide();
+            }
+            registerModal.show();
+        });
     }
-});
 
-// Modal switching
-document.getElementById('showRegister').addEventListener('click', (e) => {
-    e.preventDefault();
-    bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
-    new bootstrap.Modal(document.getElementById('registerModal')).show();
-});
+    const showLogin = document.getElementById('showLogin');
+    if (showLogin) {
+        showLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+            const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+            if (registerModal) {
+                registerModal.hide();
+            }
+            loginModal.show();
+        });
+    }
 
-document.getElementById('showLogin').addEventListener('click', (e) => {
-    e.preventDefault();
-    bootstrap.Modal.getInstance(document.getElementById('registerModal')).hide();
-    new bootstrap.Modal(document.getElementById('loginModal')).show();
-});
+    // Contact form
+    const contactForm = document.querySelector('#contact form');
+    if (contactForm) {
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = contactForm.querySelector('input[type="email"]').value;
+            const message = contactForm.querySelector('textarea').value;
+            
+            try {
+                await addDoc(collection(db, "messages"), {
+                    email: email,
+                    message: message,
+                    timestamp: new Date()
+                });
+                alert('Message sent successfully!');
+                contactForm.reset();
+            } catch (error) {
+                console.error("Error sending message:", error);
+                alert('Error sending message. Please try again.');
+            }
+        });
+    }
+}
 
 // Function to create product cards
 function createProductCard(product) {
@@ -162,7 +220,10 @@ function createProductCard(product) {
 async function loadProducts() {
     try {
         const productsContainer = document.querySelector('#products .row');
+        if (!productsContainer) return;
+
         const querySnapshot = await getDocs(collection(db, "products"));
+        productsContainer.innerHTML = ''; // Clear existing content
         
         querySnapshot.forEach((doc) => {
             const product = { id: doc.id, ...doc.data() };
@@ -182,29 +243,15 @@ async function loadProducts() {
     }
 }
 
-// Load products when the page loads
-document.addEventListener('DOMContentLoaded', loadProducts);
-
-// Handle contact form submission
-const contactForm = document.querySelector('#contact form');
-if (contactForm) {
-    contactForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = contactForm.querySelector('input[type="email"]').value;
-        const message = contactForm.querySelector('textarea').value;
-        
-        try {
-            await addDoc(collection(db, "messages"), {
-                email: email,
-                message: message,
-                timestamp: new Date()
-            });
-            alert('Message sent successfully!');
-            contactForm.reset();
-        } catch (error) {
-            console.error("Error sending message:", error);
-            alert('Error sending message. Please try again.');
-        }
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    initializeApp();
+    loadProducts();
+    
+    // Set up auth state listener
+    onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        updateCartDisplay();
     });
-}
+});
 
