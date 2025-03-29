@@ -6,7 +6,10 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /{allPaths=**} {
-      allow read, write: if true;  // Allow all operations for development
+      allow read: if true;  // Allow public read access
+      allow write: if request.auth != null && 
+                  (request.origin.matches('https://dykai-wed.github.io') || 
+                   request.origin.matches('http://localhost:5000'));  // Allow writes from GitHub Pages and localhost
     }
   }
 }
