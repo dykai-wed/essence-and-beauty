@@ -21,10 +21,16 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 
 // Connect to emulators in development
-if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    connectAuthEmulator(auth, 'http://localhost:9099');
-    connectFirestoreEmulator(db, 'localhost', 8080);
-    connectStorageEmulator(storage, 'localhost', 9199);
+const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+if (isDevelopment) {
+    try {
+        connectAuthEmulator(auth, 'http://localhost:9099');
+        connectFirestoreEmulator(db, 'localhost', 8081);
+        connectStorageEmulator(storage, 'localhost', 9199);
+        console.log('Connected to Firebase emulators');
+    } catch (error) {
+        console.error('Error connecting to emulators:', error);
+    }
 }
 
 export { app, auth, db, storage }; 
