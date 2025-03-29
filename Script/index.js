@@ -117,13 +117,32 @@ function initializeApp() {
             const password = document.getElementById('loginPassword').value;
 
             try {
-                await signInWithEmailAndPassword(auth, email, password);
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log('Login successful:', userCredential.user.email);
                 const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
                 if (loginModal) {
                     loginModal.hide();
                 }
             } catch (error) {
-                alert('Login failed: ' + error.message);
+                console.error('Login error:', error);
+                let errorMessage = 'Login failed: ';
+                switch (error.code) {
+                    case 'auth/invalid-email':
+                        errorMessage += 'Invalid email address.';
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage += 'This account has been disabled.';
+                        break;
+                    case 'auth/user-not-found':
+                        errorMessage += 'No account found with this email.';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage += 'Incorrect password.';
+                        break;
+                    default:
+                        errorMessage += error.message;
+                }
+                alert(errorMessage);
             }
         });
     }
@@ -137,13 +156,32 @@ function initializeApp() {
             const password = document.getElementById('registerPassword').value;
 
             try {
-                await createUserWithEmailAndPassword(auth, email, password);
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                console.log('Registration successful:', userCredential.user.email);
                 const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
                 if (registerModal) {
                     registerModal.hide();
                 }
             } catch (error) {
-                alert('Registration failed: ' + error.message);
+                console.error('Registration error:', error);
+                let errorMessage = 'Registration failed: ';
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage += 'An account with this email already exists.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage += 'Invalid email address.';
+                        break;
+                    case 'auth/operation-not-allowed':
+                        errorMessage += 'Email/password accounts are not enabled. Please contact support.';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage += 'Password should be at least 6 characters.';
+                        break;
+                    default:
+                        errorMessage += error.message;
+                }
+                alert(errorMessage);
             }
         });
     }
@@ -252,6 +290,30 @@ document.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, (user) => {
         currentUser = user;
         updateCartDisplay();
+        const loginBtn = document.querySelector('[data-bs-target="#loginModal"]');
+        const adminLink = document.querySelector('.admin-link');
+        
+        if (loginBtn) {
+            if (user) {
+                loginBtn.innerHTML = '<i class="bi bi-box-arrow-right"></i>';
+                loginBtn.setAttribute('data-bs-target', '');
+                loginBtn.addEventListener('click', () => signOut(auth));
+                
+                // Show admin link if user is admin
+                if (user.email === 'admin@example.com' && adminLink) {
+                    adminLink.classList.remove('d-none');
+                }
+            } else {
+                loginBtn.innerHTML = '<i class="bi bi-person"></i>';
+                loginBtn.setAttribute('data-bs-target', '#loginModal');
+                loginBtn.removeEventListener('click', () => signOut(auth));
+                
+                // Hide admin link
+                if (adminLink) {
+                    adminLink.classList.add('d-none');
+                }
+            }
+        }
     });
 });
 
