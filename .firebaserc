@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "tailor-3ef72"
-  }
+    "default": "tailor-3ef72",
+    "onose-stores": "onose-stores"
+  },
+  "targets": {},
+  "etags": {}
 }
