@@ -61,6 +61,7 @@ productForm.addEventListener('submit', async (e) => {
     const name = document.getElementById('productName').value;
     const description = document.getElementById('productDescription').value;
     const price = parseFloat(document.getElementById('productPrice').value);
+    const category = document.getElementById('productCategory').value;
     const imageFile = productImage.files[0];
     
     try {
@@ -91,6 +92,7 @@ productForm.addEventListener('submit', async (e) => {
             name,
             description,
             price,
+            category,
             imageUrl,
             createdAt: new Date()
         };
@@ -148,6 +150,7 @@ async function loadProducts() {
                             <h5 class="card-title">${product.name}</h5>
                             <p class="card-text">${product.description}</p>
                             <p class="card-text"><strong>$${product.price.toFixed(2)}</strong></p>
+                            <p class="card-text">${product.category}</p>
                             <button class="btn btn-danger btn-sm delete-product" data-id="${doc.id}">
                                 <i class="bi bi-trash"></i> Delete
                             </button>

@@ -241,7 +241,7 @@ function initializeApp() {
 function createProductCard(product) {
     return `
         <div class="col-md-4 col-lg-3">
-            <div class="card product-card h-100">
+            <div class="card product-card h-100" data-id="${product.id}" style="cursor:pointer;">
                 <img src="${product.imageUrl}" class="card-img-top" alt="${product.name}">
                 <div class="card-body">
                     <h5 class="card-title">${product.name}</h5>
@@ -254,26 +254,116 @@ function createProductCard(product) {
     `;
 }
 
-// Function to load products from Firebase
+// Function to show product modal
+function showProductModal(product) {
+    let modal = document.getElementById('productModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.id = 'productModal';
+        modal.tabIndex = -1;
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="productModalLabel"></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div class="row g-0">
+                            <div class="col-md-6 d-flex align-items-center justify-content-center bg-light">
+                                <img id="productModalImage" class="img-fluid w-100" style="object-fit:contain;max-height:400px;" />
+                            </div>
+                            <div class="col-md-6 p-4 d-flex align-items-center">
+                                <div>
+                                    <h4 id="productModalLabelInner"></h4>
+                                    <p id="productModalDescription" class="mb-0"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    document.getElementById('productModalLabel').textContent = product.name;
+    document.getElementById('productModalLabelInner').textContent = product.name;
+    document.getElementById('productModalImage').src = product.imageUrl;
+    document.getElementById('productModalImage').alt = product.name;
+    document.getElementById('productModalDescription').textContent = product.description;
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+}
+
+// --- Category list for display ---
+const PRODUCT_CATEGORIES = [
+    "Perfumes",
+    "Body Sprays&Deodorants",
+    "Humidifiers",
+    "Air-Fresheners",
+    "Diffusers",
+    "Roll-on",
+    "Gift-Sets"
+];
+
+// --- Update loadProducts to group and display by category ---
 async function loadProducts() {
     try {
-        const productsContainer = document.querySelector('#products .row');
-        if (!productsContainer) return;
+        const categoriesContainer = document.getElementById('product-categories');
+        const allProductsRow = document.getElementById('all-products-row');
+        if (!categoriesContainer || !allProductsRow) return;
 
         const querySnapshot = await getDocs(collection(db, "products"));
-        productsContainer.innerHTML = ''; // Clear existing content
-        
+        const products = [];
         querySnapshot.forEach((doc) => {
-            const product = { id: doc.id, ...doc.data() };
-            productsContainer.innerHTML += createProductCard(product);
+            products.push({ id: doc.id, ...doc.data() });
         });
 
-        // Add event listeners to Add to Cart buttons
-        document.querySelectorAll('.add-to-cart').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const productId = e.target.closest('.add-to-cart').dataset.id;
-                const product = querySnapshot.docs.find(doc => doc.id === productId).data();
-                addToCart({ id: productId, ...product });
+        // Group products by category
+        const grouped = {};
+        PRODUCT_CATEGORIES.forEach(cat => grouped[cat] = []);
+        products.forEach(prod => {
+            if (grouped[prod.category]) grouped[prod.category].push(prod);
+        });
+
+        // Render categories and products
+        categoriesContainer.innerHTML = '';
+        PRODUCT_CATEGORIES.forEach(cat => {
+            if (grouped[cat].length > 0) {
+                const section = document.createElement('section');
+                section.className = 'mb-5';
+                section.innerHTML = `
+                    <h3 class="mb-4">${cat.replace(/&/g, ' & ')}</h3>
+                    <div class="row g-4">
+                        ${grouped[cat].map(product => createProductCard(product)).join('')}
+                    </div>
+                `;
+                categoriesContainer.appendChild(section);
+            }
+        });
+        // Hide the old all-products row
+        allProductsRow.classList.add('d-none');
+
+        // Add event listeners for modal and add-to-cart
+        PRODUCT_CATEGORIES.forEach(cat => {
+            grouped[cat].forEach(product => {
+                // Add to Cart button
+                const btn = document.querySelector(`.add-to-cart[data-id="${product.id}"]`);
+                if (btn) {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        addToCart(product);
+                    });
+                }
+                // Product card modal
+                const card = document.querySelector(`.product-card[data-id="${product.id}"]`);
+                if (card) {
+                    card.addEventListener('click', (e) => {
+                        if (e.target.classList.contains('add-to-cart')) return;
+                        showProductModal(product);
+                    });
+                }
             });
         });
     } catch (error) {
@@ -316,4 +406,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-

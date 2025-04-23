@@ -66,6 +66,19 @@
                                 <input type="number" class="form-control" id="productPrice" step="0.01" required>
                             </div>
                             <div class="mb-3">
+                                <label for="productCategory" class="form-label">Category</label>
+                                <select class="form-select" id="productCategory" required>
+                                    <option value="">Select a category</option>
+                                    <option value="Perfumes">Perfumes</option>
+                                    <option value="Body Sprays&Deodorants">Body Sprays&Deodorants</option>
+                                    <option value="Humidifiers">Humidifiers</option>
+                                    <option value="Air-Fresheners">Air-Fresheners</option>
+                                    <option value="Diffusers">Diffusers</option>
+                                    <option value="Roll-on">Roll-on</option>
+                                    <option value="Gift-Sets">Gift-Sets</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
                                 <label for="productImage" class="form-label">Product Image</label>
                                 <input type="file" class="form-control" id="productImage" accept="image/*" required>
                                 <img id="imagePreview" class="preview-image d-none">
@@ -102,4 +115,4 @@
     <!-- Admin JS -->
     <script type="module" src="Script/admin.js"></script>
 </body>
-</html> 
+</html>
