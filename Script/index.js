@@ -64,6 +64,10 @@ function updateCartDisplay() {
 
 // Add to cart
 function addToCart(product) {
+    if (!currentUser) {
+        requireLoginOrRegister();
+        return;
+    }
     const existingItem = cart.find(item => item.id === product.id);
     if (existingItem) {
         existingItem.quantity += 1;
@@ -71,6 +75,8 @@ function addToCart(product) {
         cart.push({ ...product, quantity: 1 });
     }
     updateCartDisplay();
+    updateCartBadge();
+    // Optionally, save cart to localStorage or Firestore
 }
 
 // Remove from cart
@@ -447,6 +453,25 @@ function sendOrderToWhatsApp(order, address) {
     const message = formatWhatsAppOrderMessage(order, address);
     const url = `https://wa.me/${adminNumber}?text=${message}`;
     window.open(url, '_blank');
+}
+
+// --- ENFORCE LOGIN FOR ADD TO CART ---
+function requireLoginOrRegister() {
+    // Show login or register modal/section
+    // If you have a modal, trigger it here. Otherwise, scroll to or show the login/register UI.
+    // Example: show login modal or scroll to login section
+    const loginModal = document.getElementById('loginModal');
+    if (loginModal) {
+        const modal = new bootstrap.Modal(loginModal);
+        modal.show();
+    } else {
+        // Fallback: scroll to login form if modal not present
+        const loginSection = document.getElementById('loginSection') || document.getElementById('login');
+        if (loginSection) {
+            loginSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        alert('Please login or register to add items to your cart.');
+    }
 }
 
 // Wait for DOM to be fully loaded

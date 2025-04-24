@@ -17,6 +17,12 @@
             width: 100%;
             position: relative;
         }
+        body, body * {
+            color: #811331 !important;
+        }
+        .hero-section, .hero-section * {
+            color: #fff !important;
+        }
         .hero-section {
             background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('Images/WhatsApp Image 2025-02-11 at 00.20.43_9d3a5474.jpg');
             background-size: cover;
@@ -24,7 +30,6 @@
             height: 80vh;
             display: flex;
             align-items: center;
-            color: white;
             position: relative;
             overflow: hidden;
         }
@@ -152,41 +157,48 @@
             font-size: 1.5rem;
             font-weight: 600;
         }
-        /* Pinkish color for links and accents */
-        .pink-text, .pink-link, .pink-link:visited {
-            color: #e75480 !important;
+        /* Bisque accent color for links and accents */
+        .bisque-text, .bisque-link, .bisque-link:visited {
+            color: #F2D2BD !important;
         }
         a.text-decoration-none, a.text-decoration-none:visited {
-            color: #e75480 !important;
+            color: #F2D2BD !important;
         }
         .btn-primary, .btn-primary:focus, .btn-primary:active {
-            background-color: #e75480 !important;
-            border-color: #e75480 !important;
+            background-color: #F2D2BD !important;
+            border-color: #F2D2BD !important;
+            color: #000 !important;
         }
         .btn-primary:hover {
-            background-color: #d1456a !important;
-            border-color: #d1456a !important;
+            background-color: #e6c3ad !important;
+            border-color: #e6c3ad !important;
+            color: #000 !important;
         }
         .form-label, .form-control:focus {
-            color: #e75480 !important;
-            border-color: #e75480 !important;
-            box-shadow: 0 0 0 0.2rem rgba(231,84,128,.25) !important;
+            color: #F2D2BD !important;
+            border-color: #F2D2BD !important;
+            box-shadow: 0 0 0 0.2rem rgba(242,210,189,.25) !important;
         }
-        .footer h5, .footer a, .footer ul li a {
-            color: #e75480 !important;
-        }
-        .footer a:hover {
-            color: #d1456a !important;
+        .footer h5, .footer a {
+            color: #F2D2BD !important;
         }
         .footer ul li a {
             color: #000 !important;
         }
         .footer ul li a:hover {
-            color: #e75480 !important;
+            color: #F2D2BD !important;
+        }
+        /* Categories text */
+        #product-categories, .categories-title, .categories-text {
+            color: #811331 !important;
+            font-weight: bold !important;
         }
         /* Optionally, override Bootstrap's primary color globally */
         :root {
-            --bs-primary: #e75480;
+            --bs-primary: #F2D2BD;
+        }
+        .claret-text {
+            color: #811331 !important;
         }
     </style>
 </head>
@@ -318,9 +330,16 @@
     <!-- Hero Section -->
     <section class="hero-section" id="home">
         <div class="container text-center">
-            <h1 class="display-4 fw-bold">Discover Your Signature Fragrances</h1>
-            <p class="lead">Explore our collection of premium Fragrances</p>
-            <a href="#products" class="btn btn-light btn-lg mt-3">Shop Now</a>
+            <div id="hero-normal">
+                <h1 class="display-4 fw-bold">Discover Your Signature Fragrances</h1>
+                <p class="lead">Explore our collection of premium Fragrances</p>
+                <a href="#products" class="btn btn-light btn-lg mt-3 claret-text">Shop Now</a>
+            </div>
+            <div id="hero-product" style="display:none">
+                <h2 id="hero-product-name"></h2>
+                <p id="hero-product-desc"></p>
+                <button id="hero-add-to-cart" class="btn btn-primary">Add to Cart</button>
+            </div>
         </div>
     </section>
 
