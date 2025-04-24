@@ -207,6 +207,74 @@ function initializeApp() {
         });
     }
 
+    // --- EMAIL VALIDATION FOR REGISTRATION ---
+    function isValidEmail(email) {
+        // Simple regex for email validation
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    const registerFormEmailValidation = document.querySelector('#register form');
+    if (registerFormEmailValidation) {
+        registerFormEmailValidation.addEventListener('submit', function(e) {
+            const emailInput = registerFormEmailValidation.querySelector('input[type="email"]');
+            if (emailInput && !isValidEmail(emailInput.value.trim())) {
+                e.preventDefault();
+                alert('Email not valid');
+                emailInput.focus();
+                return false;
+            }
+        });
+    }
+
+    // --- PREVENT ADDRESS FIELD IN LOGIN/REGISTER ---
+    // Registration
+    // (Reverted: No longer blocking address fields)
+    // Login
+    // (Reverted: No longer blocking address fields)
+
+    // --- ENFORCE DELIVERY ADDRESS FOR REGISTRATION ---
+    const registerFormAddressValidation = document.getElementById('registerForm');
+    if (registerFormAddressValidation) {
+        registerFormAddressValidation.addEventListener('submit', function(e) {
+            const addressInput = document.getElementById('registerAddress');
+            if (!addressInput || !addressInput.value.trim()) {
+                e.preventDefault();
+                alert('Please enter your delivery address to register.');
+                addressInput && addressInput.focus();
+                return false;
+            }
+        });
+    }
+
+    // --- ENFORCE DELIVERY ADDRESS FOR LOGIN (EXCEPTIONS FOR USERS WHO HAVE LOGGED IN BEFORE) ---
+    const loginFormAddressValidation = document.getElementById('loginForm');
+    if (loginFormAddressValidation) {
+        loginFormAddressValidation.addEventListener('submit', async function(e) {
+            const addressInput = document.getElementById('loginAddress');
+            const emailInput = document.getElementById('loginEmail');
+            // Check localStorage for previous login with address
+            let userEmail = emailInput ? emailInput.value.trim().toLowerCase() : '';
+            let addressGivenBefore = false;
+            if (userEmail) {
+                try {
+                    addressGivenBefore = localStorage.getItem('userAddress_' + userEmail) === 'true';
+                } catch (err) { addressGivenBefore = false; }
+            }
+            if ((!addressInput || !addressInput.value.trim()) && !addressGivenBefore) {
+                e.preventDefault();
+                alert('Please enter your delivery address to log in.');
+                addressInput && addressInput.focus();
+                return false;
+            }
+            // If address is provided, save flag in localStorage
+            if (addressInput && addressInput.value.trim()) {
+                try {
+                    localStorage.setItem('userAddress_' + userEmail, 'true');
+                } catch (err) {}
+            }
+        });
+    }
+
     // Modal switching
     const showRegister = document.getElementById('showRegister');
     if (showRegister) {
@@ -251,6 +319,19 @@ function initializeApp() {
             const body = encodeURIComponent(`From: ${email}\n\n${message}`);
             window.open(`mailto:${recipient}?subject=${subject}&body=${body}`);
             contactForm.reset();
+        });
+    }
+
+    // --- ADDRESS UPDATE BUTTON ---
+    const addressBtn = document.getElementById('addressBtn');
+    if (addressBtn) {
+        addressBtn.addEventListener('click', function() {
+            // Show address modal for updating address
+            const modalEl = document.getElementById('addressModal');
+            if (modalEl) {
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            }
         });
     }
 }

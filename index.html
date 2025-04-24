@@ -244,6 +244,9 @@
                         <i class="bi bi-cart"></i>
                         <span class="cart-badge">0</span>
                     </button>
+                    <button class="btn btn-outline-primary me-2" id="addressBtn" title="Update Address" data-bs-toggle="modal" data-bs-target="#addressModal">
+                        <i class="bi bi-geo-alt"></i>
+                    </button>
                     <button class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#loginModal">
                         <i class="bi bi-person"></i>
                     </button>
@@ -265,7 +268,7 @@
                         <!-- Cart items will be dynamically added here -->
                     </div>
                     <div class="cart-total">
-                        Total: $<span id="cartTotal">0.00</span>
+                        Total: <span id="cartTotal">0.00</span>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -294,6 +297,10 @@
                             <label for="loginPassword" class="form-label">Password</label>
                             <input type="password" class="form-control" id="loginPassword" required>
                         </div>
+                        <div class="mb-3">
+                            <label for="loginAddress" class="form-label">Delivery Address</label>
+                            <textarea class="form-control" id="loginAddress" required></textarea>
+                        </div>
                         <button type="submit" class="btn btn-primary w-100">Login</button>
                     </form>
                     <div class="text-center mt-3">
@@ -321,6 +328,10 @@
                         <div class="mb-3">
                             <label for="registerPassword" class="form-label">Password</label>
                             <input type="password" class="form-control" id="registerPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="registerAddress" class="form-label">Delivery Address</label>
+                            <textarea class="form-control" id="registerAddress" required></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary w-100">Register</button>
                     </form>
