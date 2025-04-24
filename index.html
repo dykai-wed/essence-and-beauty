@@ -152,6 +152,36 @@
             font-size: 1.5rem;
             font-weight: 600;
         }
+        /* Pinkish color for links and accents */
+        .pink-text, .pink-link, .pink-link:visited {
+            color: #e75480 !important;
+        }
+        a.text-decoration-none, a.text-decoration-none:visited {
+            color: #e75480 !important;
+        }
+        .btn-primary, .btn-primary:focus, .btn-primary:active {
+            background-color: #e75480 !important;
+            border-color: #e75480 !important;
+        }
+        .btn-primary:hover {
+            background-color: #d1456a !important;
+            border-color: #d1456a !important;
+        }
+        .form-label, .form-control:focus {
+            color: #e75480 !important;
+            border-color: #e75480 !important;
+            box-shadow: 0 0 0 0.2rem rgba(231,84,128,.25) !important;
+        }
+        .footer h5, .footer a, .footer ul li a {
+            color: #e75480 !important;
+        }
+        .footer a:hover {
+            color: #d1456a !important;
+        }
+        /* Optionally, override Bootstrap's primary color globally */
+        :root {
+            --bs-primary: #e75480;
+        }
     </style>
 </head>
 <body>
@@ -282,8 +312,8 @@
     <!-- Hero Section -->
     <section class="hero-section" id="home">
         <div class="container text-center">
-            <h1 class="display-4 fw-bold">Discover Your Natural Beauty</h1>
-            <p class="lead">Explore our collection of premium beauty products</p>
+            <h1 class="display-4 fw-bold">Discover Your Signature Fragrances</h1>
+            <p class="lead">Explore our collection of premium Fragrances</p>
             <a href="#products" class="btn btn-light btn-lg mt-3">Shop Now</a>
         </div>
     </section>
@@ -344,7 +374,7 @@
             <div class="row">
                 <div class="col-md-4">
                     <h5>Essence & Beauty</h5>
-                    <p>Your destination for natural beauty products.</p>
+                    <p>Discover Your Signature Fragrances.</p>
                 </div>
                 <div class="col-md-4">
                     <h5>Quick Links</h5>
@@ -358,9 +388,8 @@
                 <div class="col-md-4">
                     <h5>Connect With Us</h5>
                     <div class="social-links">
-                        <a href="#" class="text-decoration-none me-2"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="text-decoration-none me-2"><i class="bi bi-instagram"></i></a>
-                        <a href="#" class="text-decoration-none me-2"><i class="bi bi-twitter"></i></a>
+                        <a href="https://instagram.com/essence_beauty.5" class="text-decoration-none me-2" target="_blank" rel="noopener"><i class="bi bi-instagram"></i></a>
+                        <a href="https://www.tiktok.com/@essence_beauty.5" class="text-decoration-none me-2" target="_blank" rel="noopener"><i class="bi bi-tiktok"></i></a>
                     </div>
                 </div>
             </div>

@@ -37,7 +37,7 @@ function updateCartDisplay() {
                 <img src="${item.imageUrl}" alt="${item.name}">
                 <div class="cart-item-details">
                     <h6>${item.name}</h6>
-                    <p class="cart-item-price">$${item.price} x ${item.quantity}</p>
+                    <p class="cart-item-price">₦${item.price} x ${item.quantity}</p>
                 </div>
                 <button class="btn btn-sm btn-danger remove-item" data-id="${item.id}">
                     <i class="bi bi-trash"></i>
@@ -56,7 +56,7 @@ function updateCartDisplay() {
 
     if (cartTotal) {
         const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        cartTotal.textContent = total.toFixed(2);
+        cartTotal.textContent = `₦${total.toFixed(2)}`;
     }
     
     updateCartBadge();
@@ -228,26 +228,23 @@ function initializeApp() {
         });
     }
 
-    // Contact form
+    // Contact form (send via mailto)
     const contactForm = document.querySelector('#contact form');
     if (contactForm) {
         contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = contactForm.querySelector('input[type="email"]').value;
-            const message = contactForm.querySelector('textarea').value;
-            
-            try {
-                await addDoc(collection(db, "messages"), {
-                    email: email,
-                    message: message,
-                    timestamp: new Date()
-                });
-                alert('Message sent successfully!');
-                contactForm.reset();
-            } catch (error) {
-                console.error("Error sending message:", error);
-                alert('Error sending message. Please try again.');
+            const email = contactForm.querySelector('input[type="email"]').value.trim();
+            const message = contactForm.querySelector('textarea').value.trim();
+            if (!email || !message) {
+                alert('Please enter both your email and a message.');
+                return;
             }
+            // Use mailto to open the user's email client
+            const recipient = 'ruthaisuebeogun@gmail.com';
+            const subject = encodeURIComponent('Contact Form Message');
+            const body = encodeURIComponent(`From: ${email}\n\n${message}`);
+            window.open(`mailto:${recipient}?subject=${subject}&body=${body}`);
+            contactForm.reset();
         });
     }
 }
@@ -305,7 +302,7 @@ function createProductCard(product) {
                 <div class="card-body">
                     <h5 class="card-title">${product.name}</h5>
                     <p class="card-text">${product.description}</p>
-                    <p class="card-text"><strong>$${product.price}</strong></p>
+                    <p class="card-text"><strong>₦${product.price}</strong></p>
                     <button class="btn btn-primary w-100 add-to-cart" data-id="${product.id}">Add to Cart</button>
                 </div>
             </div>
@@ -439,7 +436,7 @@ function formatWhatsAppOrderMessage(order, address) {
     order.items.forEach(item => {
         msg += `- ${item.name} (Qty: ${item.quantity})%0A`;
     });
-    msg += `*Total:* $${order.total.toFixed(2)}%0A`;
+    msg += `*Total:* ₦${order.total.toFixed(2)}%0A`;
     msg += `%0A*Order ID:* ${order.orderId || ''}`;
     return msg;
 }
