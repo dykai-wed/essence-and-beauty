@@ -14,6 +14,10 @@ import {
     getDoc 
 } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
+const functionsInstance = getFunctions();
+
+const sendOrderEmail = httpsCallable(functionsInstance, 'sendOrderEmail');
+
 // Cart functionality
 let cart = [];
 let currentUser = null;
@@ -114,8 +118,8 @@ function initializeApp() {
                 cart = [];
                 updateCartDisplay();
 
-                // Send to Gmail
-                sendOrderToGmail(order, address);
+                // Send to WhatsApp
+                sendOrderToWhatsApp(order, address);
             } catch (error) {
                 console.error('Error placing order:', error);
                 alert('Error placing order. Please try again.');
@@ -263,29 +267,6 @@ async function getUserAddress(uid) {
     } catch {
         return '';
     }
-}
-
-// Helper: Format Gmail order message
-function formatGmailOrderMessage(order, address) {
-    let msg = `New Order Placed!\n`;
-    msg += `User: ${order.userEmail || order.userId}\n`;
-    msg += `Address: ${address}\n`;
-    msg += `Items:\n`;
-    order.items.forEach(item => {
-        msg += `- ${item.name} (Qty: ${item.quantity})\n`;
-    });
-    msg += `Total: $${order.total.toFixed(2)}\n`;
-    msg += `\nOrder ID: ${order.orderId || ''}`;
-    return msg;
-}
-
-// Helper: Open Gmail compose with order details
-function sendOrderToGmail(order, address) {
-    const recipient = 'ruthaisuebeogun@gmail.com';
-    const subject = encodeURIComponent('New Order Placed');
-    const body = encodeURIComponent(formatGmailOrderMessage(order, address));
-    const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${recipient}&su=${subject}&body=${body}`;
-    window.open(url, '_blank');
 }
 
 // Helper: Check if user has address
@@ -451,6 +432,28 @@ async function loadProducts() {
     } catch (error) {
         console.error("Error loading products:", error);
     }
+}
+
+// Helper: Format WhatsApp message
+function formatWhatsAppOrderMessage(order, address) {
+    let msg = `*New Order Placed!*%0A`;
+    msg += `*User:* ${order.userEmail || order.userId}%0A`;
+    msg += `*Address:* ${address}%0A`;
+    msg += `*Items:*%0A`;
+    order.items.forEach(item => {
+        msg += `- ${item.name} (Qty: ${item.quantity})%0A`;
+    });
+    msg += `*Total:* $${order.total.toFixed(2)}%0A`;
+    msg += `%0A*Order ID:* ${order.orderId || ''}`;
+    return msg;
+}
+
+// Helper: Open WhatsApp link
+function sendOrderToWhatsApp(order, address) {
+    const adminNumber = '2348127470741'; // Remove leading zero for international format
+    const message = formatWhatsAppOrderMessage(order, address);
+    const url = `https://wa.me/${adminNumber}?text=${message}`;
+    window.open(url, '_blank');
 }
 
 // Wait for DOM to be fully loaded
