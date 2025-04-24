@@ -276,6 +276,9 @@
         </div>
     </div>
 
+    <!-- Address Modal (First Login) -->
+    <div id="address-modal-placeholder"></div>
+
     <!-- Hero Section -->
     <section class="hero-section" id="home">
         <div class="container text-center">
@@ -372,5 +375,11 @@
     <script type="module" src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
     <!-- Custom JS -->
     <script type="module" src="Script/index.js"></script>
+    <script type="module">
+        // Dynamically load the address modal HTML
+        fetch('address-modal.html').then(res => res.text()).then(html => {
+            document.getElementById('address-modal-placeholder').innerHTML = html;
+        });
+    </script>
 </body>
 </html>

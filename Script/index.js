@@ -10,7 +10,8 @@ import {
     getDocs, 
     addDoc, 
     doc, 
-    setDoc 
+    setDoc, 
+    getDoc 
 } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
 // Cart functionality
@@ -88,19 +89,33 @@ function initializeApp() {
                 alert('Please login to checkout');
                 return;
             }
-            
+
             try {
-                const orderRef = await addDoc(collection(db, 'orders'), {
+                // Get user address
+                const address = await getUserAddress(currentUser.uid);
+                if (!address) {
+                    alert('Please add your delivery address before ordering.');
+                    return;
+                }
+
+                const order = {
                     userId: currentUser.uid,
+                    userEmail: currentUser.email,
                     items: cart,
                     total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
                     status: 'pending',
                     createdAt: new Date()
-                });
-                
+                };
+
+                const orderRef = await addDoc(collection(db, 'orders'), order);
+                order.orderId = orderRef.id;
+
                 alert('Order placed successfully!');
                 cart = [];
                 updateCartDisplay();
+
+                // Send to Gmail
+                sendOrderToGmail(order, address);
             } catch (error) {
                 console.error('Error placing order:', error);
                 alert('Error placing order. Please try again.');
@@ -235,6 +250,73 @@ function initializeApp() {
             }
         });
     }
+}
+
+// Helper: Get user address from Firestore
+async function getUserAddress(uid) {
+    try {
+        const userDoc = await getDoc(doc(db, 'users', uid));
+        if (userDoc.exists()) {
+            return userDoc.data().address || '';
+        }
+        return '';
+    } catch {
+        return '';
+    }
+}
+
+// Helper: Format Gmail order message
+function formatGmailOrderMessage(order, address) {
+    let msg = `New Order Placed!\n`;
+    msg += `User: ${order.userEmail || order.userId}\n`;
+    msg += `Address: ${address}\n`;
+    msg += `Items:\n`;
+    order.items.forEach(item => {
+        msg += `- ${item.name} (Qty: ${item.quantity})\n`;
+    });
+    msg += `Total: $${order.total.toFixed(2)}\n`;
+    msg += `\nOrder ID: ${order.orderId || ''}`;
+    return msg;
+}
+
+// Helper: Open Gmail compose with order details
+function sendOrderToGmail(order, address) {
+    const recipient = 'ruthaisuebeogun@gmail.com';
+    const subject = encodeURIComponent('New Order Placed');
+    const body = encodeURIComponent(formatGmailOrderMessage(order, address));
+    const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${recipient}&su=${subject}&body=${body}`;
+    window.open(url, '_blank');
+}
+
+// Helper: Check if user has address
+async function userHasAddress(uid) {
+    try {
+        const userDoc = await getDoc(doc(db, 'users', uid));
+        return userDoc.exists() && userDoc.data().address;
+    } catch {
+        return false;
+    }
+}
+
+// Helper: Save address
+async function saveUserAddress(uid, address) {
+    await setDoc(doc(db, 'users', uid), { address }, { merge: true });
+}
+
+// Address modal logic
+function showAddressModal(onSubmit) {
+    const modalEl = document.getElementById('addressModal');
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+    const form = document.getElementById('addressForm');
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        const address = document.getElementById('deliveryAddress').value.trim();
+        if (address) {
+            await onSubmit(address);
+            modal.hide();
+        }
+    };
 }
 
 // Function to create product cards
@@ -377,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadProducts();
     
     // Set up auth state listener
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
         currentUser = user;
         updateCartDisplay();
         const loginBtn = document.querySelector('[data-bs-target="#loginModal"]');
@@ -392,6 +474,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Show admin link if user is admin
                 if (user.email === 'admin@example.com' && adminLink) {
                     adminLink.classList.remove('d-none');
+                }
+
+                // Require address on first login
+                if (!(await userHasAddress(user.uid))) {
+                    showAddressModal(async (address) => {
+                        await saveUserAddress(user.uid, address);
+                    });
                 }
             } else {
                 loginBtn.innerHTML = '<i class="bi bi-person"></i>';
